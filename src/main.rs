@@ -1,7 +1,15 @@
-use fltk::{app, button::Button, enums::Color, frame::Frame, prelude::*, window::Window};
+use fltk::{
+    app,
+    button::{self, Button},
+    enums::{self, Color},
+    frame::Frame,
+    prelude::*,
+    window::Window,
+};
 
 extern crate directories;
 use directories::UserDirs;
+use fltk_flex::Flex;
 
 use std::{fs, io};
 
@@ -47,41 +55,73 @@ struct Pak_editor {
     name: Frame,
     remove: Button,
 }
-//Make impl for this
+
+impl Pak_editor {
+    pub fn new(h: i32, pak_name: &String) -> Pak_editor {
+        let mut flex = Flex::default().with_size(400, h).row();
+        let mut name = Frame::default().with_label(pak_name);
+        let mut remove = Button::default().with_label("-");
+        let mut add = Button::default().with_label("+").with_size(20, 20);
+        //let mut add = Button::new(x + 200, y, 20, h, "+");
+
+        flex.end();
+
+        add.set_callback({
+            let pak_n_clone = pak_name.clone();
+            move |_| {
+                move_file_to_dir(
+                    "T:/Documents/RONMODLOADER/",
+                    "T:/Steam/steamapps/common/Ready Or Not/ReadyOrNot/Content/Paks/",
+                    &pak_n_clone,
+                );
+            }
+        });
+
+        remove.set_callback({
+            let pak_n_clone = pak_name.clone();
+            move |_| {
+                move_file_to_dir(
+                    "T:/Steam/steamapps/common/Ready Or Not/ReadyOrNot/Content/Paks/",
+                    "T:/Documents/RONMODLOADER/",
+                    &pak_n_clone,
+                );
+            }
+        });
+        Pak_editor { name, remove }
+    }
+}
 fn main() {
+    let gameFolder = "T:/Steam/steamapps/common/Ready Or Not/ReadyOrNot/Content/Paks/";
+    let testUnloadedFolder = "T:/Documents/RONMODLOADER/";
     check_for_unloaded_pak_folder();
     let app = app::App::default();
-    let mut wind = Window::new(100, 100, 400, 300, "Ready or Not Mod Manager");
+    let mut wind = Window::new(100, 100, 600, 300, "Ready or Not Mod Manager");
     wind.set_color(Color::White);
-    let loaded_paks =
-        fetch_packs_from_dir("T:/Steam/steamapps/common/Ready Or Not/ReadyOrNot/Content/Paks/");
+    let loaded_paks = fetch_packs_from_dir(gameFolder);
+
+    let un_loaded_paks = fetch_packs_from_dir(testUnloadedFolder);
 
     println!("{:?}", loaded_paks);
+    println!("{:?}", un_loaded_paks);
 
-    let mut pak_list_2: Vec<Pak_editor> = vec![];
-
+    let mut flex = Flex::default().with_size(600, 300).column();
     for l in 0..loaded_paks.len() {
         let offset = l as i32;
-        let mut newPak = Pak_editor {
-            name: Frame::new(50, 20 * offset, 200, 20, "text").with_label(&loaded_paks[l]),
-            remove: Button::new(300, 20 * offset, 100, 50, "-"),
-        };
-        pak_list_2.push(newPak);
+        Pak_editor::new(50, &loaded_paks[l]);
     }
 
-    //scroll.
-    wind.end();
-    wind.show();
+    let unloadedOffset = 20 + (30 * loaded_paks.len() as i32);
+    let unloaded = Frame::new(100, unloadedOffset + 50, 50, 50, "unloaded").set_label("unloaded");
 
-    //Test button callback
-    pak_list_2[0].remove.set_callback(move |_| {
-        move_file_to_dir(
-            "T:/Steam/steamapps/common/Ready Or Not/ReadyOrNot/Content/Paks/",
-            "T:/Steam/steamapps/common/",
-            "pakchunk99-Mods_WeaponUnlocker_P.pak",
-        );
-        wind.redraw(); // Is not correct...
-    });
+    for j in 0..un_loaded_paks.len() {
+        let offset = j as i32;
+        Pak_editor::new(50, &un_loaded_paks[j]);
+    }
+    flex.end();
+
+    wind.end();
+    wind.make_resizable(true);
+    wind.show();
 
     app.run().unwrap();
 }

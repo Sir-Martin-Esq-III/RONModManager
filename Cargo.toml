@@ -8,4 +8,5 @@ edition = "2021"
 [dependencies]
 fltk = { version = "^1.2", features = ["fltk-bundled"] }
 directories = "4.0"
+fltk-flex = "0.2"
 

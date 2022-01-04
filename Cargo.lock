@@ -8,6 +8,7 @@ version = "0.1.0"
 dependencies = [
  "directories",
  "fltk",
+ "fltk-flex",
 ]
 
 [[package]]
@@ -87,6 +88,15 @@ dependencies = [
  "crossbeam-channel",
  "fltk-sys",
  "paste",
+]
+
+[[package]]
+name = "fltk-flex"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "58c935b6cbf53a3681beef6339ca0edbfdd091c0f00a275d886107ed1a66caca"
+dependencies = [
+ "fltk",
 ]
 
 [[package]]
